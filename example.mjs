@@ -109,9 +109,14 @@ console.log(
   })
 ); // Prints: { content: [ { type: 'text', text: 'hello 1' } ] }
 
-const internalTransport = new MultiClientTransport([clientA, clientB]);
+const internalTransport = new MultiClientTransport([
+  clientPrefix,
+  clientSuffix,
+]);
 const client = new Client();
 await client.connect(internalTransport);
+console.log(await client.listTools()); // Prints:{ tools:[ { name: 'client_prefix__tool_a', ... }, { name: 'client_prefix__tool_b', ... },...]}
+
 console.log(
   await client.callTool({
     name: "client_prefix__tool_a",
@@ -134,7 +139,7 @@ console.log(
 ); // Prints: { content: [ { type: 'text', text: 'hello a' } ] }
 
 console.log(
-  await client.callTool("server_suffix__tool_1", {
+  await client.callTool({
     name: "client_suffix__tool_1",
     arguments: { message: "hello" },
   })
