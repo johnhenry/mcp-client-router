@@ -650,5 +650,63 @@ const ClientRouter = class {
     }
   }
 };
+/**
+ * Connects the router to a Server Transport, making the router behave like an MCP server
+ * @param {Transport|Function} transportOrConstructor - The transport instance or constructor function
+ * @param {Object} options - Options to pass to the transport constructor if a constructor is provided
+ * @returns {Transport} The connected transport instance
+ */
+ClientRouter.prototype.connect = async function (transportOrConstructor, options = {}) {
+  // If a constructor function is provided, instantiate it
+  let transport = typeof transportOrConstructor === 'function' 
+    ? new transportOrConstructor(options)
+    : transportOrConstructor;
+  
+  // Store a reference to the transport
+  this.serverTransport = transport;
+  
+  // Set up event handlers
+  transport.onmessage = (message) => {
+    // When the transport receives a message, forward it to our send method
+    this.send(message)
+      .catch(error => {
+        console.error("Error handling message in ClientRouter:", error);
+        if (this.onerror) {
+          this.onerror(error);
+        }
+      });
+  };
+  
+  transport.onerror = (error) => {
+    console.error("Error in server transport:", error);
+    if (this.onerror) {
+      this.onerror(error);
+    }
+  };
+  
+  transport.onclose = () => {
+    console.log("Server transport closed");
+    if (this.onclose) {
+      this.onclose();
+    }
+  };
+  
+  // Set our onmessage handler to forward responses back to the transport
+  this.onmessage = (response) => {
+    transport.send(response)
+      .catch(error => {
+        console.error("Error sending response to transport:", error);
+        if (this.onerror) {
+          this.onerror(error);
+        }
+      });
+  };
+  
+  // Start the transport
+  await transport.start();
+  
+  return transport;
+};
+
 export { ClientRouter };
 export default ClientRouter;
