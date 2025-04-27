@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "main": "index.mjs",
   "scripts": {
-    "test": "node --test tests.mjs"
+    "test": "node --test tests/tests.mjs"
   },
   "keywords": [],
   "author": "",
