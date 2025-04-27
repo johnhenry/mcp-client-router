@@ -231,27 +231,29 @@ test("multiclient transport correctly gets prompts", async (t) => {
 test("multiclient transport correctly lists and prefixes all resources", async (t) => {
   // Get all resources
   const { resources } = await client.listResources();
-  console.log(resources);
   // There should be 2 resources
   assert.strictEqual(resources.length, 2);
 
   // Check that all expected resources have their URIs properly prefixed
   const resourceUris = resources.map((resource) => resource.uri);
-  console.log(resourceUris);
+  console.log({ resources, resourceUris });
+
+  const temp = await clientPrefix.listResources();
+  console.log(temp);
 
   // Check for the prefixed URIs with simple prefix format
-  const prefixUriFound = resourceUris.none((uri) =>
+  const prefixUriFound = resourceUris.some((uri) =>
     uri.includes("client_prefix__readme")
   );
-  const suffixUriFound = resourceUris.none((uri) =>
+  const suffixUriFound = resourceUris.some((uri) =>
     uri.includes("client_suffix__docs")
   );
 
-  // assert.ok(prefixUriFound, "Prefix resource URI not found");
-  // assert.ok(suffixUriFound, "Suffix resource URI not found");
+  assert.ok(prefixUriFound, "Prefix resource URI not found");
+  assert.ok(suffixUriFound, "Suffix resource URI not found");
 });
 
-test.skip("multiclient transport correctly reads resources", async (t) => {
+test("multiclient transport correctly reads resources", async (t) => {
   // Get all resources to get the prefixed URIs
   const { resources } = await client.listResources();
 
@@ -296,10 +298,13 @@ test.skip("multiclient transport correctly reads resources", async (t) => {
   // Test handling of non-existent resource
   await assert.rejects(
     async () => {
-      await client.readResource({ uri: "client_prefix__nonexistent" });
+      const result = await client.readResource({
+        uri: "client_prefix__nonexistent",
+      });
+      console.log({ result });
     },
     (err) => {
-      return err.message.includes("not found");
+      return err.message.includes("Invalid URL");
     }
   );
 });

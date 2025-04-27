@@ -66,7 +66,7 @@ const clientPrefix = await spawnClient(
     resources: [
       [
         "readme",
-        "A simple readme resource",
+        "readme://prefix",
         async () => ({
           contents: [
             {
@@ -145,8 +145,8 @@ const clientSuffix = await spawnClient(
     ],
     resources: [
       [
-        "documentation",
-        "API documentation resource",
+        "docs",
+        "docs://suffix/api",
         async () => ({
           contents: [
             {
