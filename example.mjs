@@ -35,8 +35,40 @@ const serverPrefix = new DeclarativeMCPServer({
       }),
     ],
   ],
-  prompts: [],
-  resources: [],
+  prompts: [
+    [
+      "greeting",
+      "A greeting prompt template",
+      {
+        name: z.string().optional(),
+        formal: z.boolean().optional(),
+      },
+      async ({ name = "World", formal = false }) => ({
+        content: [
+          {
+            type: "text",
+            text: formal
+              ? `Dear ${name}, welcome to our service.`
+              : `Hi ${name}! Welcome aboard!`,
+          },
+        ],
+      }),
+    ],
+  ],
+  resources: [
+    [
+      "readme",
+      "A simple readme resource",
+      async () => ({
+        contents: [
+          {
+            uri: "readme://prefix",
+            text: "This is the prefix server readme.",
+          },
+        ],
+      }),
+    ],
+  ],
 });
 
 const serverSuffix = new DeclarativeMCPServer({
@@ -70,8 +102,40 @@ const serverSuffix = new DeclarativeMCPServer({
       }),
     ],
   ],
-  prompts: [],
-  resources: [],
+  prompts: [
+    [
+      "farewell",
+      "A farewell prompt template",
+      {
+        name: z.string().optional(),
+        formal: z.boolean().optional(),
+      },
+      async ({ name = "User", formal = false }) => ({
+        content: [
+          {
+            type: "text",
+            text: formal
+              ? `Thank you for your time, ${name}. We hope to see you again.`
+              : `Bye ${name}! Come back soon!`,
+          },
+        ],
+      }),
+    ],
+  ],
+  resources: [
+    [
+      "documentation",
+      "API documentation resource",
+      async () => ({
+        contents: [
+          {
+            uri: "docs://suffix/api",
+            text: "This is the suffix server API documentation.",
+          },
+        ],
+      }),
+    ],
+  ],
 });
 const clientPrefix = await spawnClient(serverPrefix, {
   name: "client_prefix",
@@ -144,3 +208,26 @@ console.log(
     arguments: { message: "hello" },
   })
 ); // Prints: { content: [ { type: 'text', text: 'hello 1' } ] }
+
+// List all prompts
+console.log(await client.listPrompts()); // Prints: { prompts: [{ name: 'client_prefix__greeting', ... }, { name: 'client_suffix__farewell', ... }] }
+
+// Get a specific prompt
+console.log(
+  await client.getPrompt({
+    name: "client_prefix__greeting",
+    arguments: { name: "John", formal: true }
+  })
+); // Prints: { prompt: { name: 'client_prefix__greeting', description: 'A greeting prompt template', ... } }
+
+// List all resources
+console.log(await client.listResources()); // Prints: { resources: [{ uri: 'client_prefix__readme://prefix', ... }, { uri: 'client_suffix__docs://suffix/api', ... }] }
+
+// Get the resource URI from the listResources result
+const resources = await client.listResources();
+const prefixResourceUri = resources.resources.find(r => r.uri && r.uri.startsWith("client_prefix__"))?.uri;
+
+// Read a specific resource
+console.log(
+  await client.readResource({ uri: prefixResourceUri })
+); // Prints: { contents: [{ uri: 'client_prefix__readme://prefix', text: 'This is the prefix server readme.' }] }
