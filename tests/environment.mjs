@@ -1,7 +1,7 @@
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
-import spawnClient from "../spawn-client.mjs";
-import DeclarativeMCPServer from "../declaritive-mcp-server.mjs";
-import MulticlientTransport from "../index.mjs";
+import spawnClient from "./spawn-client.mjs";
+import DeclarativeMCPServer from "./declaritive-mcp-server.mjs";
+import { ClientRouter } from "../index.mjs";
 import { z } from "zod";
 
 const clientPrefix = await spawnClient(
@@ -165,13 +165,13 @@ const clientSuffix = await spawnClient(
 );
 
 // Create a multiclient transport with both clients
-const internalTransport = new MulticlientTransport([
-  clientPrefix,
-  clientSuffix,
-]);
+const router = new ClientRouter([clientPrefix, clientSuffix]);
 
 // Create main client connected to the multiclient transport
-const client = new Client();
-await client.connect(internalTransport);
+const client = new Client({
+  name: "client",
+  version: "1.0.0",
+});
+await client.connect(router);
 
-export { clientPrefix, clientSuffix, internalTransport, client };
+export { clientPrefix, clientSuffix, router, client };

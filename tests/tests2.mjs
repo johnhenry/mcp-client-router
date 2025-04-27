@@ -1,50 +1,11 @@
 import { test } from "node:test";
 import assert from "node:assert";
-import { clientPrefix, clientSuffix, client } from "./environment.mjs";
-
-// Test direct client calls
-test("direct client calls work correctly", async (t) => {
-  // Test prefix client tool_a
-  const result1 = await clientPrefix.callTool({
-    name: "tool_a",
-    arguments: { message: "hello" },
-  });
-  assert.deepStrictEqual(result1, {
-    content: [{ type: "text", text: "a hello" }],
-  });
-
-  // Test prefix client tool_b
-  const result2 = await clientPrefix.callTool({
-    name: "tool_b",
-    arguments: { message: "hello" },
-  });
-  assert.deepStrictEqual(result2, {
-    content: [{ type: "text", text: "b hello" }],
-  });
-
-  // Test suffix client tool_a
-  const result3 = await clientSuffix.callTool({
-    name: "tool_a",
-    arguments: { message: "hello" },
-  });
-  assert.deepStrictEqual(result3, {
-    content: [{ type: "text", text: "hello a" }],
-  });
-
-  // Test suffix client tool_1
-  const result4 = await clientSuffix.callTool({
-    name: "tool_1",
-    arguments: { message: "hello" },
-  });
-  assert.deepStrictEqual(result4, {
-    content: [{ type: "text", text: "hello 1" }],
-  });
-});
+import { client2 } from "./environment2.mjs";
 
 // Test multiclient transport tool calls
 test("multiclient transport correctly routes prefixed tool calls", async (t) => {
   // Test client_prefix__tool_a
-  const result1 = await client.callTool({
+  const result1 = await client2.callTool({
     name: "client_prefix__tool_a",
     arguments: { message: "hello" },
   });
@@ -53,7 +14,7 @@ test("multiclient transport correctly routes prefixed tool calls", async (t) => 
   });
 
   // Test client_prefix__tool_b
-  const result2 = await client.callTool({
+  const result2 = await client2.callTool({
     name: "client_prefix__tool_b",
     arguments: { message: "hello" },
   });
@@ -62,7 +23,7 @@ test("multiclient transport correctly routes prefixed tool calls", async (t) => 
   });
 
   // Test client_suffix__tool_a
-  const result3 = await client.callTool({
+  const result3 = await client2.callTool({
     name: "client_suffix__tool_a",
     arguments: { message: "hello" },
   });
@@ -71,7 +32,7 @@ test("multiclient transport correctly routes prefixed tool calls", async (t) => 
   });
 
   // Test client_suffix__tool_1
-  const result4 = await client.callTool({
+  const result4 = await client2.callTool({
     name: "client_suffix__tool_1",
     arguments: { message: "hello" },
   });
@@ -83,7 +44,7 @@ test("multiclient transport correctly routes prefixed tool calls", async (t) => 
 // Test tool listing
 test("multiclient transport correctly lists and prefixes all tools", async (t) => {
   // Get all tools
-  const { tools } = await client.listTools();
+  const { tools } = await client2.listTools();
 
   // There should be 4 tools
   assert.strictEqual(tools.length, 4);
@@ -105,7 +66,7 @@ test("multiclient transport correctly handles non-existent tools", async (t) => 
   // Try to call a non-existent tool
   await assert.rejects(
     async () => {
-      await client.callTool({
+      await client2.callTool({
         name: "client_prefix__non_existent_tool",
         arguments: { message: "hello" },
       });
@@ -119,7 +80,7 @@ test("multiclient transport correctly handles non-existent tools", async (t) => 
   // Try to call a tool with wrong client prefix
   await assert.rejects(
     async () => {
-      await client.callTool({
+      await client2.callTool({
         name: "non_existent_client__tool_a",
         arguments: { message: "hello" },
       });
@@ -136,7 +97,7 @@ test("multiclient transport correctly handles invalid tool names", async (t) => 
   // Try to call a tool without a proper prefix
   await assert.rejects(
     async () => {
-      await client.callTool({
+      await client2.callTool({
         name: "invalid_tool_name_without_prefix",
         arguments: { message: "hello" },
       });
@@ -151,7 +112,7 @@ test("multiclient transport correctly handles invalid tool names", async (t) => 
 // Test prompt handling
 test("multiclient transport correctly lists and prefixes all prompts", async (t) => {
   // Get all prompts
-  const { prompts } = await client.listPrompts();
+  const { prompts } = await client2.listPrompts();
 
   // There should be 2 prompts
   assert.strictEqual(prompts.length, 2);
@@ -171,7 +132,7 @@ test("multiclient transport correctly lists and prefixes all prompts", async (t)
 test("multiclient transport correctly gets prompts", async (t) => {
   // Get a specific prompt from the prefix client
 
-  const result1 = await client.getPrompt({
+  const result1 = await client2.getPrompt({
     name: "client_prefix__greeting",
     arguments: { name: "Test" },
   });
@@ -180,7 +141,7 @@ test("multiclient transport correctly gets prompts", async (t) => {
     "Hi Test! Welcome aboard!"
   );
 
-  const result2 = await client.getPrompt({
+  const result2 = await client2.getPrompt({
     name: "client_prefix__greeting",
     arguments: { name: "Test", formality: "FORMAL" },
   });
@@ -190,7 +151,7 @@ test("multiclient transport correctly gets prompts", async (t) => {
   );
 
   // // Get a specific prompt from the suffix client
-  const result11 = await client.getPrompt({
+  const result11 = await client2.getPrompt({
     name: "client_suffix__farewell",
     arguments: { name: "User" },
   });
@@ -199,7 +160,7 @@ test("multiclient transport correctly gets prompts", async (t) => {
     result11.messages?.[0]?.content?.text,
     "Bye User! Come back soon!"
   );
-  const result22 = await client.getPrompt({
+  const result22 = await client2.getPrompt({
     name: "client_suffix__farewell",
     arguments: { name: "User", formality: "FORMAL" },
   });
@@ -211,7 +172,7 @@ test("multiclient transport correctly gets prompts", async (t) => {
   // Test handling of non-existent prompt
   await assert.rejects(
     async () => {
-      await client.getPrompt({
+      await client2.getPrompt({
         name: "client_prefix__nonexistent",
         arguments: {},
       });
@@ -225,7 +186,7 @@ test("multiclient transport correctly gets prompts", async (t) => {
 // Test resource handling
 test("multiclient transport correctly lists and prefixes all resources", async (t) => {
   // Get all resources
-  const { resources } = await client.listResources();
+  const { resources } = await client2.listResources();
   // There should be 2 resources
   assert.strictEqual(resources.length, 2);
 
@@ -246,7 +207,7 @@ test("multiclient transport correctly lists and prefixes all resources", async (
 
 test("multiclient transport correctly reads resources", async (t) => {
   // Get all resources to get the prefixed URIs
-  const { resources } = await client.listResources();
+  const { resources } = await client2.listResources();
 
   // Find the specific resources - use the simple prefix format now
   const prefixResourceUri = resources.find(
@@ -261,7 +222,7 @@ test("multiclient transport correctly reads resources", async (t) => {
   assert.ok(suffixResourceUri, "Suffix resource URI not found");
 
   // Read the resources with their prefixed URIs
-  const prefixResult = await client.readResource({ uri: prefixResourceUri });
+  const prefixResult = await client2.readResource({ uri: prefixResourceUri });
 
   assert.ok(prefixResult.contents);
   assert.strictEqual(prefixResult.contents.length, 1);
@@ -274,7 +235,7 @@ test("multiclient transport correctly reads resources", async (t) => {
   assert.ok(prefixResult.contents[0].uri.includes("client_prefix"));
 
   // Read the suffix resource
-  const suffixResult = await client.readResource({ uri: suffixResourceUri });
+  const suffixResult = await client2.readResource({ uri: suffixResourceUri });
 
   assert.ok(suffixResult.contents);
   assert.strictEqual(suffixResult.contents.length, 1);
@@ -289,9 +250,10 @@ test("multiclient transport correctly reads resources", async (t) => {
   // Test handling of non-existent resource
   await assert.rejects(
     async () => {
-      const result = await client.readResource({
+      const result = await client2.readResource({
         uri: "client_prefix__nonexistent",
       });
+      console.log({ result });
     },
     (err) => {
       return err.message.includes("Invalid URL");

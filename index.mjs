@@ -1,9 +1,10 @@
 /**
- * MulticlientTransport is a class that allows for the creation of multiple clients AND properly prefixes names of tool
+ * ClientRouter exposes multiple clients as a single transport.
+ * It follows the Transport interface from the Model Context Protocol
  * @implements {Transport} // https://raw.githubusercontent.com/modelcontextprotocol/typescript-sdk/main/src/shared/transport.ts
  * @param {Array} clients - The clients to be used in the transport.
  */
-export const MulticlientTransport = class {
+const ClientRouter = class {
   #clients = [];
 
   onclose = undefined;
@@ -73,7 +74,7 @@ export const MulticlientTransport = class {
       // For other messages, broadcast to all clients
       return this.#broadcastMessage(message, options);
     } catch (error) {
-      console.error("Error in MulticlientTransport.send:", error);
+      console.error("Error in ClientRouter.send:", error);
 
       if (message.id) {
         this.#sendError(message.id, -32603, `Internal error: ${error.message}`);
@@ -111,7 +112,7 @@ export const MulticlientTransport = class {
           prompts: true,
         },
         serverInfo: {
-          name: "MulticlientTransport",
+          name: "ClientRouter",
           version: "1.0.0",
         },
       },
@@ -252,7 +253,7 @@ export const MulticlientTransport = class {
           }
         } catch (error) {
           console.error(
-            `MulticlientTransport: Error getting tools from ${client._clientInfo?.name}:`,
+            `ClientRouter: Error getting tools from ${client._clientInfo?.name}:`,
             error
           );
         }
@@ -305,7 +306,7 @@ export const MulticlientTransport = class {
           }
         } catch (error) {
           console.error(
-            `MulticlientTransport: Error getting prompts from ${client._clientInfo?.name}:`,
+            `ClientRouter: Error getting prompts from ${client._clientInfo?.name}:`,
             error
           );
         }
@@ -381,25 +382,7 @@ export const MulticlientTransport = class {
 
       try {
         // Prepare the arguments for the prompt
-
         const promptArguments = message.params.arguments || {};
-
-        // const promptArguments = {};
-        // if (message.params?.arguments) {
-        //   // Process each argument
-        //   for (const [key, value] of Object.entries(message.params.arguments)) {
-        //     // Convert boolean values to strings if needed
-        //     if (typeof value === "boolean") {
-        //       promptArguments[key] = String(value);
-        //       console.log(
-        //         `Converting boolean to string for ${key}: ${value} -> "${promptArguments[key]}"`
-        //       );
-        //     } else {
-        //       promptArguments[key] = value;
-        //     }
-        //   }
-        // }
-
         // Call the client with properly formatted arguments
         console.log(
           `Calling getPrompt for ${actualPromptName}`,
@@ -637,7 +620,7 @@ export const MulticlientTransport = class {
       if (client.transport) {
         return client.transport.send(message, options).catch((err) => {
           console.error(
-            `MulticlientTransport: Error sending to client "${client._clientInfo?.name}":`,
+            `ClientRouter: Error sending to client "${client._clientInfo?.name}":`,
             err
           );
         });
@@ -667,5 +650,5 @@ export const MulticlientTransport = class {
     }
   }
 };
-
-export default MulticlientTransport;
+export { ClientRouter };
+export default ClientRouter;
