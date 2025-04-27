@@ -1,9 +1,9 @@
 {
-  "name": "mcp-multiclient",
+  "name": "mcp-client-router",
   "version": "0.0.0",
   "main": "index.mjs",
   "scripts": {
-    "test": "node --test tests/tests.mjs"
+    "test": "node --test tests/test.**.mjs"
   },
   "keywords": [],
   "author": "",

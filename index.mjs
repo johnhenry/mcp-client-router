@@ -105,11 +105,24 @@ const ClientRouter = class {
       jsonrpc: "2.0",
       id: message.id,
       result: {
-        protocolVersion: "0.5.0",
+        protocolVersion: "2024-11-05",
         capabilities: {
-          tools: true,
-          resources: true,
-          prompts: true,
+          tools: {
+            supports_list: true,
+            supports_info: true,
+            supports_execute: true,
+            supports_list_changes: true,
+          },
+          resources: {
+            supports_list: true,
+            supports_read: true,
+            supports_list_changes: true,
+          },
+          prompts: {
+            supports_list: true,
+            supports_get: true,
+            supports_list_changes: true,
+          },
         },
         serverInfo: {
           name: "ClientRouter",
@@ -656,55 +669,57 @@ const ClientRouter = class {
  * @param {Object} options - Options to pass to the transport constructor if a constructor is provided
  * @returns {Transport} The connected transport instance
  */
-ClientRouter.prototype.connect = async function (transportOrConstructor, options = {}) {
+ClientRouter.prototype.connect = async function (
+  transportOrConstructor,
+  options = {}
+) {
   // If a constructor function is provided, instantiate it
-  let transport = typeof transportOrConstructor === 'function' 
-    ? new transportOrConstructor(options)
-    : transportOrConstructor;
-  
+  let transport =
+    typeof transportOrConstructor === "function"
+      ? new transportOrConstructor(options)
+      : transportOrConstructor;
+
   // Store a reference to the transport
   this.serverTransport = transport;
-  
+
   // Set up event handlers
   transport.onmessage = (message) => {
     // When the transport receives a message, forward it to our send method
-    this.send(message)
-      .catch(error => {
-        console.error("Error handling message in ClientRouter:", error);
-        if (this.onerror) {
-          this.onerror(error);
-        }
-      });
+    this.send(message).catch((error) => {
+      console.error("Error handling message in ClientRouter:", error);
+      if (this.onerror) {
+        this.onerror(error);
+      }
+    });
   };
-  
+
   transport.onerror = (error) => {
     console.error("Error in server transport:", error);
     if (this.onerror) {
       this.onerror(error);
     }
   };
-  
+
   transport.onclose = () => {
     console.log("Server transport closed");
     if (this.onclose) {
       this.onclose();
     }
   };
-  
+
   // Set our onmessage handler to forward responses back to the transport
   this.onmessage = (response) => {
-    transport.send(response)
-      .catch(error => {
-        console.error("Error sending response to transport:", error);
-        if (this.onerror) {
-          this.onerror(error);
-        }
-      });
+    transport.send(response).catch((error) => {
+      console.error("Error sending response to transport:", error);
+      if (this.onerror) {
+        this.onerror(error);
+      }
+    });
   };
-  
+
   // Start the transport
   await transport.start();
-  
+
   return transport;
 };
 

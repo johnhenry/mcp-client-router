@@ -1,43 +1,37 @@
 import { test } from "node:test";
 import assert from "node:assert";
-import { clientPrefix, clientSuffix, client } from "./environment.mjs";
+import { client2 as client } from "./environment.mjs";
 
-// Test direct client calls
-test("direct client calls work correctly", async (t) => {
-  // Test prefix client tool_a
-  const result1 = await clientPrefix.callTool({
-    name: "tool_a",
-    arguments: { message: "hello" },
-  });
-  assert.deepStrictEqual(result1, {
-    content: [{ type: "text", text: "a hello" }],
+// Create a new ClientRouter with the test clients
+
+test("ClientRouter.connect sets up event handlers correctly", async (t) => {
+  // Test that we can retrieve the prompts (should be 2 from environment.mjs)
+  const promptsResult = await client.listPrompts();
+  assert.ok(promptsResult.prompts, "Should return prompts");
+  assert.equal(promptsResult.prompts.length, 2, "Should return two prompts");
+
+  // Test that we can retrieve the tools (should be 4 from environment.mjs)
+  const toolsResult = await client.listTools();
+  assert.ok(toolsResult.tools, "Should return tools");
+  assert.equal(toolsResult.tools.length, 4, "Should return four tools");
+
+  // Test that we can retrieve the resources (should be 2 from environment.mjs)
+  const resourcesResult = await client.listResources();
+  assert.ok(resourcesResult.resources, "Should return resources");
+  assert.equal(
+    resourcesResult.resources.length,
+    2,
+    "Should return two resources"
+  );
+
+  // Verify that the client can call a tool through the router
+  const toolResult = await client.callTool({
+    name: "client_prefix__tool_a",
+    arguments: { message: "test" },
   });
 
-  // Test prefix client tool_b
-  const result2 = await clientPrefix.callTool({
-    name: "tool_b",
-    arguments: { message: "hello" },
-  });
-  assert.deepStrictEqual(result2, {
-    content: [{ type: "text", text: "b hello" }],
-  });
-
-  // Test suffix client tool_a
-  const result3 = await clientSuffix.callTool({
-    name: "tool_a",
-    arguments: { message: "hello" },
-  });
-  assert.deepStrictEqual(result3, {
-    content: [{ type: "text", text: "hello a" }],
-  });
-
-  // Test suffix client tool_1
-  const result4 = await clientSuffix.callTool({
-    name: "tool_1",
-    arguments: { message: "hello" },
-  });
-  assert.deepStrictEqual(result4, {
-    content: [{ type: "text", text: "hello 1" }],
+  assert.deepStrictEqual(toolResult, {
+    content: [{ type: "text", text: "a test" }],
   });
 });
 
