@@ -1,7 +1,7 @@
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
-import spawnClient from "../lib/mcp-spawn-client/index.mjs";
-import DeclarativeMCPServer from "../lib/mcp-declarative-server/index.mjs";
+import spawnClient from "mcp-spawn-client";
+import DeclarativeMCPServer from "mcp-declarative-server";
 import { ClientRouter } from "../src/index.mjs";
 import { z } from "zod";
 

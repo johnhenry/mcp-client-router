@@ -1,5 +1,5 @@
 import process from "node:process";
-import createExpressApp from "../lib/mcp-create-express-app/index.mjs";
+import createExpressApp from "mcp-create-express-app";
 import { createServerSuffix } from "./environment.mjs";
 const PORT = process.env.PORT_FOR_SERVER;
 const app = await createExpressApp(createServerSuffix());
