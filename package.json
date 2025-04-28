@@ -6,14 +6,16 @@
   "types": "types.d.ts",
   "type": "module",
   "scripts": {
-    "test": "node --test --env-file-if-exists=tests/.env tests/test.*.mjs"
+    "test:one": "node --test --env-file-if-exists=tests/.env",
+    "test": "node --run test:one -- tests/test.*.mjs"
   },
   "keywords": [
     "mcp",
     "model-context-protocol",
     "router",
     "client",
-    "transport"
+    "transport",
+    "combine"
   ],
   "author": "",
   "license": "ISC",
@@ -21,7 +23,6 @@
     "@modelcontextprotocol/sdk": "^1.10.2"
   },
   "devDependencies": {
-    "express": "^5.1.0",
     "zod": "^3.24.3"
   },
   "files": [
@@ -32,21 +33,6 @@
   ],
   "engines": {
     "node": ">=18.0.0"
-  },
-  "exports": {
-    ".": {
-      "import": "./src/index.mjs",
-      "types": "./types.d.ts"
-    },
-    "./declarative-server": {
-      "import": "./lib/mcp-declarative-server/index.mjs"
-    },
-    "./spawn-client": {
-      "import": "./lib/mcp-spawn-client/index.mjs"
-    },
-    "./spawn-express-app": {
-      "import": "./lib/mcp-spawn-express-app/index.mjs"
-    }
   },
   "repository": {
     "type": "git",

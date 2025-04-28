@@ -2,7 +2,7 @@
  * Type definitions for mcp-declarative-server
  */
 
-import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 
 export type ToolHandler = (params: any) => Promise<any>;
 export type PromptHandler = (params: any) => Promise<any>;
@@ -22,10 +22,7 @@ export type PromptDefinition = [
   description?: string
 ];
 
-export type ResourceDefinition = [
-  uri: string,
-  handler: ResourceHandler
-];
+export type ResourceDefinition = [uri: string, handler: ResourceHandler];
 
 export interface DeclarativeMCPServerOptions {
   name: string;

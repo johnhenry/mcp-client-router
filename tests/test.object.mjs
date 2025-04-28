@@ -17,7 +17,7 @@ const router = await fromObject(
         args: [`${DIR}/tests/stdio-server.mjs`],
       },
       client_suffix: {
-        url: `http://localhost:${PORT}/mcp`,
+        url: `http://localhost:${PORT}/`,
       },
     },
   },

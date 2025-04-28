@@ -1,6 +1,6 @@
 {
   "name": "mcp-spawn-client",
-  "version": "1.0.0",
+  "version": "0.0.0",
   "description": "Spawn Model Context Protocol clients connected to servers using in-memory transports",
   "main": "index.mjs",
   "types": "types.d.ts",

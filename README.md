@@ -21,24 +21,28 @@ npm install mcp-client-router
 ### Basic Usage
 
 ```javascript
-import { ClientRouter } from 'mcp-client-router';
-import { Client } from '@modelcontextprotocol/sdk/client/index.js';
-import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js';
+import { ClientRouter } from "mcp-client-router";
+import { Client } from "@modelcontextprotocol/sdk/client/index.js";
+import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
 
 // Create individual clients
-const client1 = new Client({ name: 'client1', version: '1.0.0' });
-const client2 = new Client({ name: 'client2', version: '1.0.0' });
+const client1 = new Client({ name: "client1", version: "1.0.0" });
+const client2 = new Client({ name: "client2", version: "1.0.0" });
 
 // Connect them to their respective transports
-await client1.connect(new StdioClientTransport({
-  command: 'node',
-  args: ['server1.js']
-}));
+await client1.connect(
+  new StdioClientTransport({
+    command: "node",
+    args: ["server1.js"],
+  })
+);
 
-await client2.connect(new StdioClientTransport({
-  command: 'node',
-  args: ['server2.js']
-}));
+await client2.connect(
+  new StdioClientTransport({
+    command: "node",
+    args: ["server2.js"],
+  })
+);
 
 // Create a router with the clients
 const router = new ClientRouter([client1, client2]);
@@ -49,26 +53,28 @@ const allTools = await router.listTools();
 
 // To call a specific tool
 const result = await router.callTool({
-  name: 'client1__toolName',
-  arguments: { /* args */ }
+  name: "client1__toolName",
+  arguments: {
+    /* args */
+  },
 });
 ```
 
 ### Creating from Configuration Object
 
 ```javascript
-import { fromObject } from 'mcp-client-router';
+import { fromObject } from "mcp-client-router";
 
 const router = await fromObject({
   mcpServers: {
     client1: {
-      command: 'node',
-      args: ['server1.js']
+      command: "node",
+      args: ["server1.js"],
     },
     client2: {
-      url: 'http://localhost:3000/mcp'
-    }
-  }
+      url: "http://localhost:3000/mcp",
+    },
+  },
 });
 
 // Now use the router as a unified client
@@ -77,16 +83,18 @@ const router = await fromObject({
 ### Connecting to a Server Transport
 
 ```javascript
-import { ClientRouter } from 'mcp-client-router';
-import { HTTPServerTransport } from '@modelcontextprotocol/sdk/server/http.js';
+import { ClientRouter } from "mcp-client-router";
+import { HTTPServerTransport } from "@modelcontextprotocol/sdk/server/http.js";
 
 // Create router with clients
-const router = new ClientRouter([/* clients */]);
+const router = new ClientRouter([
+  /* clients */
+]);
 
 // Connect to an HTTP server transport
 const httpTransport = await router.connect(HTTPServerTransport, {
   port: 3000,
-  path: '/mcp'
+  path: "/mcp",
 });
 
 // The router now acts as an MCP server
@@ -108,7 +116,7 @@ This package includes several utility submodules:
 
 - `mcp-declarative-server`: Create MCP servers declaratively
 - `mcp-spawn-client`: Easily spawn clients connected to servers
-- `mcp-spawn-express-app`: Create Express apps with MCP support
+- `mcp-create-express-app`: Create Express apps with MCP support
 
 ## API Reference
 
@@ -117,7 +125,7 @@ This package includes several utility submodules:
 The main class that implements the MCP Transport interface.
 
 ```javascript
-new ClientRouter(clients = [])
+new ClientRouter((clients = []));
 ```
 
 #### Methods

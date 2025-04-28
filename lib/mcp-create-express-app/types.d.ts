@@ -1,22 +1,29 @@
 /**
- * Type definitions for mcp-spawn-express-app
+ * Type definitions for mcp-create-express-app
  */
 
-import { Application } from 'express';
-import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import { Application } from "express";
+import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 
-export interface SpawnExpressOptions {
+export interface createExpressOptions {
   /**
-   * The path at which to expose the MCP server 
+   * The path at which to expose the MCP server
    * @default '/mcp'
    */
   path?: string;
-  
+
   /**
    * CORS configuration options
    */
   corsOptions?: {
-    origin?: string | string[] | boolean | ((origin: string, callback: (err: Error | null, allow?: boolean) => void) => void);
+    origin?:
+      | string
+      | string[]
+      | boolean
+      | ((
+          origin: string,
+          callback: (err: Error | null, allow?: boolean) => void
+        ) => void);
     methods?: string | string[];
     allowedHeaders?: string | string[];
     exposedHeaders?: string | string[];
@@ -27,7 +34,7 @@ export interface SpawnExpressOptions {
   };
 }
 
-export interface SpawnStatefulOptions extends SpawnExpressOptions {
+export interface createStatefulOptions extends createExpressOptions {
   /**
    * Session timeout in milliseconds
    * @default 1800000 (30 minutes)
@@ -41,10 +48,10 @@ export interface SpawnStatefulOptions extends SpawnExpressOptions {
  * @param server The MCP server to expose
  * @param options Configuration options
  */
-export function spawnStateless(
-  app: Application, 
-  server: McpServer, 
-  options?: SpawnExpressOptions
+export function createStateless(
+  app: Application,
+  server: McpServer,
+  options?: createExpressOptions
 ): void;
 
 /**
@@ -53,11 +60,11 @@ export function spawnStateless(
  * @param server The MCP server to expose
  * @param options Configuration options
  */
-export function spawnStateful(
-  app: Application, 
-  server: McpServer, 
-  options?: SpawnStatefulOptions
+export function createStateful(
+  app: Application,
+  server: McpServer,
+  options?: createStatefulOptions
 ): void;
 
-// Alias for spawnStateless
-export const spawnExpressApp: typeof spawnStateless;
+// Alias for createStateless
+export const createExpressApp: typeof createStateless;

@@ -1,6 +1,6 @@
 {
   "name": "mcp-declarative-server",
-  "version": "1.0.0",
+  "version": "0.0.0",
   "description": "Create MCP servers declaratively",
   "main": "index.mjs",
   "types": "types.d.ts",
