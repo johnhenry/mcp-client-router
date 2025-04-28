@@ -1,10 +1,38 @@
 import { test } from "node:test";
 import assert from "node:assert";
-import { client2 as client } from "./environment.mjs";
+import process from "node:process";
+import { Client } from "@modelcontextprotocol/sdk/client/index.js";
+import { fromObject } from "../src/index.mjs";
+import closeServer from "./start-http-server.mjs"; // Ensure the server is imported to register tools
+const PORT = process.env.PORT_FOR_SERVER;
+const DIR = process.env.PATH_TO_REPO;
+const NODE = process.env.PATH_TO_NODE;
 
-// Create a new ClientRouter with the test clients
+const router = await fromObject(
+  {
+    mcpServers: {
+      client_prefix: {
+        disabled: false,
+        command: NODE,
+        args: [`${DIR}/tests/stdio-server.mjs`],
+      },
+      client_suffix: {
+        url: `http://localhost:${PORT}/mcp`,
+      },
+    },
+  },
+  {
+    allow: [],
+    deny: [],
+  }
+);
+const client = new Client({
+  name: "client",
+  version: "1.0.0",
+});
+await client.connect(router);
 
-test("ClientRouter.connect sets up event handlers correctly", async (t) => {
+await test("ClientRouter.connect sets up event handlers correctly", async (t) => {
   // Test that we can retrieve the prompts (should be 2 from environment.mjs)
   const promptsResult = await client.listPrompts();
   assert.ok(promptsResult.prompts, "Should return prompts");
@@ -36,7 +64,7 @@ test("ClientRouter.connect sets up event handlers correctly", async (t) => {
 });
 
 // Test multiclient transport tool calls
-test("multiclient transport correctly routes prefixed tool calls", async (t) => {
+await test("multiclient transport correctly routes prefixed tool calls", async (t) => {
   // Test client_prefix__tool_a
   const result1 = await client.callTool({
     name: "client_prefix__tool_a",
@@ -75,7 +103,7 @@ test("multiclient transport correctly routes prefixed tool calls", async (t) => 
 });
 
 // Test tool listing
-test("multiclient transport correctly lists and prefixes all tools", async (t) => {
+await test("multiclient transport correctly lists and prefixes all tools", async (t) => {
   // Get all tools
   const { tools } = await client.listTools();
 
@@ -95,7 +123,7 @@ test("multiclient transport correctly lists and prefixes all tools", async (t) =
 });
 
 // Test error handling for non-existent tools
-test("multiclient transport correctly handles non-existent tools", async (t) => {
+await test("multiclient transport correctly handles non-existent tools", async (t) => {
   // Try to call a non-existent tool
   await assert.rejects(
     async () => {
@@ -126,7 +154,7 @@ test("multiclient transport correctly handles non-existent tools", async (t) => 
 });
 
 // Test error handling for invalid tool names
-test("multiclient transport correctly handles invalid tool names", async (t) => {
+await test("multiclient transport correctly handles invalid tool names", async (t) => {
   // Try to call a tool without a proper prefix
   await assert.rejects(
     async () => {
@@ -143,7 +171,7 @@ test("multiclient transport correctly handles invalid tool names", async (t) => 
 });
 
 // Test prompt handling
-test("multiclient transport correctly lists and prefixes all prompts", async (t) => {
+await test("multiclient transport correctly lists and prefixes all prompts", async (t) => {
   // Get all prompts
   const { prompts } = await client.listPrompts();
 
@@ -162,7 +190,7 @@ test("multiclient transport correctly lists and prefixes all prompts", async (t)
   assert.strictEqual(greeting.description, "A greeting prompt template");
 });
 
-test("multiclient transport correctly gets prompts", async (t) => {
+await test("multiclient transport correctly gets prompts", async (t) => {
   // Get a specific prompt from the prefix client
 
   const result1 = await client.getPrompt({
@@ -217,7 +245,7 @@ test("multiclient transport correctly gets prompts", async (t) => {
 });
 
 // Test resource handling
-test("multiclient transport correctly lists and prefixes all resources", async (t) => {
+await test("multiclient transport correctly lists and prefixes all resources", async (t) => {
   // Get all resources
   const { resources } = await client.listResources();
   // There should be 2 resources
@@ -238,7 +266,7 @@ test("multiclient transport correctly lists and prefixes all resources", async (
   assert.ok(suffixUriFound, "Suffix resource URI not found");
 });
 
-test("multiclient transport correctly reads resources", async (t) => {
+await test("multiclient transport correctly reads resources", async (t) => {
   // Get all resources to get the prefixed URIs
   const { resources } = await client.listResources();
 
@@ -292,3 +320,6 @@ test("multiclient transport correctly reads resources", async (t) => {
     }
   );
 });
+
+await router.close();
+closeServer();

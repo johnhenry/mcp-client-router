@@ -74,8 +74,6 @@ const ClientRouter = class {
       // For other messages, broadcast to all clients
       return this.#broadcastMessage(message, options);
     } catch (error) {
-      console.error("Error in ClientRouter.send:", error);
-
       if (message.id) {
         this.#sendError(message.id, -32603, `Internal error: ${error.message}`);
       }
@@ -92,6 +90,15 @@ const ClientRouter = class {
   async close() {
     if (this.onclose) {
       this.onclose();
+    }
+    for (const client of this.#clients) {
+      try {
+        await client.close();
+      } catch (error) {
+        throw new Error(
+          `Error closing client ${client._clientInfo?.name}: ${error}`
+        );
+      }
     }
     return Promise.resolve();
   }
@@ -265,9 +272,8 @@ const ClientRouter = class {
             allTools.push(...prefixedTools);
           }
         } catch (error) {
-          console.error(
-            `ClientRouter: Error getting tools from ${client._clientInfo?.name}:`,
-            error
+          throw new Error(
+            `ClientRouter: Error getting tools from ${client._clientInfo?.name}:${error}`
           );
         }
       }
@@ -318,9 +324,8 @@ const ClientRouter = class {
             allPrompts.push(...prefixedPrompts);
           }
         } catch (error) {
-          console.error(
-            `ClientRouter: Error getting prompts from ${client._clientInfo?.name}:`,
-            error
+          throw new Error(
+            `ClientRouter: Error getting prompts from ${client._clientInfo?.name}:${error}`
           );
         }
       }
@@ -397,10 +402,6 @@ const ClientRouter = class {
         // Prepare the arguments for the prompt
         const promptArguments = message.params.arguments || {};
         // Call the client with properly formatted arguments
-        console.log(
-          `Calling getPrompt for ${actualPromptName}`,
-          promptArguments
-        );
         const result = await client.getPrompt({
           name: actualPromptName,
           arguments: promptArguments,
@@ -445,31 +446,20 @@ const ClientRouter = class {
   async #handleListResources(message, options) {
     try {
       const allResources = [];
-      console.log("Starting to list resources from all clients");
 
       // Get resources from each client and prefix them
       for (const client of this.#clients) {
         try {
-          console.log(
-            `Listing resources from client: ${client._clientInfo?.name}`
-          );
           // Attempt to list resources from this client
           const result = await client.listResources();
-          console.log(
-            `Got resources from ${client._clientInfo?.name}:`,
-            JSON.stringify(result)
-          );
 
           if (result && result.resources && Array.isArray(result.resources)) {
-            console.log(`Found ${result.resources.length} resources`);
-
             // Prefix each resource URI with the client name
             const prefixedResources = result.resources.map((resource) => {
               const prefixedResource = { ...resource };
 
               if (resource.uri) {
                 prefixedResource.uri = `${client._clientInfo.name}__${resource.uri}`;
-                console.log(`Created prefixed URI: ${prefixedResource.uri}`);
               }
 
               return prefixedResource;
@@ -477,14 +467,10 @@ const ClientRouter = class {
 
             allResources.push(...prefixedResources);
           } else {
-            console.log(
-              `No resources found for client ${client._clientInfo?.name}`
-            );
           }
         } catch (error) {
-          console.error(
-            `Error listing resources from ${client._clientInfo?.name}:`,
-            error
+          throw new Error(
+            `Error listing resources from ${client._clientInfo?.name}:${error}`
           );
         }
       }
@@ -498,16 +484,11 @@ const ClientRouter = class {
         },
       };
 
-      console.log(
-        `Sending response with ${allResources.length} total resources`
-      );
-
       // Send the response
       if (this.onmessage) {
         this.onmessage(response);
       }
     } catch (error) {
-      console.error(`Error in #handleListResources:`, error);
       this.#sendError(
         message.id,
         -32603,
@@ -524,13 +505,10 @@ const ClientRouter = class {
     try {
       // Get the resource URI from the request
       let resourceUri = message.params?.uri;
-      console.log(`Reading resource: ${resourceUri}`);
-
       if (!resourceUri) {
         // Try to find uri in params.arguments if it wasn't directly in params
         if (message.params?.arguments?.uri) {
           resourceUri = message.params.arguments.uri;
-          console.log(`Found URI in arguments: ${resourceUri}`);
         }
       }
 
@@ -543,7 +521,6 @@ const ClientRouter = class {
 
       // Use a simple approach: split by double underscore
       const parts = resourceUri.split("__");
-      console.log(`Split URI into parts: ${JSON.stringify(parts)}`);
 
       if (parts.length < 2) {
         this.#sendError(
@@ -556,7 +533,6 @@ const ClientRouter = class {
 
       clientName = parts[0];
       actualUri = parts.slice(1).join("__");
-      console.log(`Client name: ${clientName}, Actual URI: ${actualUri}`);
 
       // Find the client by name
       const client = this.#clients.find(
@@ -573,10 +549,8 @@ const ClientRouter = class {
       }
 
       try {
-        console.log(`Reading resource from client ${clientName}`);
         // Read the resource from the client
         const result = await client.readResource({ uri: actualUri });
-        console.log(`Got resource result:`, JSON.stringify(result));
 
         // Prefix any URIs in the resource contents
         if (result && result.contents && Array.isArray(result.contents)) {
@@ -585,9 +559,6 @@ const ClientRouter = class {
               // Use the simpler consistent approach - always prefix with client__
               const originalUri = content.uri;
               content.uri = `${clientName}__${content.uri}`;
-              console.log(
-                `Prefixed content URI: ${originalUri} -> ${content.uri}`
-              );
             }
           });
         }
@@ -604,10 +575,6 @@ const ClientRouter = class {
           this.onmessage(response);
         }
       } catch (error) {
-        console.error(
-          `Error reading resource ${actualUri} from client ${clientName}:`,
-          error
-        );
         this.#sendError(
           message.id,
           -32603,
@@ -615,7 +582,6 @@ const ClientRouter = class {
         );
       }
     } catch (error) {
-      console.error(`Error in #handleReadResource:`, error);
       this.#sendError(
         message.id,
         -32603,
@@ -631,10 +597,9 @@ const ClientRouter = class {
   async #broadcastMessage(message, options) {
     const promises = this.#clients.map((client) => {
       if (client.transport) {
-        return client.transport.send(message, options).catch((err) => {
-          console.error(
-            `ClientRouter: Error sending to client "${client._clientInfo?.name}":`,
-            err
+        return client.transport.send(message, options).catch((error) => {
+          throw new Error(
+            `ClientRouter: Error sending to client "${client._clientInfo?.name}":${error}`
           );
         });
       }
@@ -686,7 +651,6 @@ ClientRouter.prototype.connect = async function (
   transport.onmessage = (message) => {
     // When the transport receives a message, forward it to our send method
     this.send(message).catch((error) => {
-      console.error("Error handling message in ClientRouter:", error);
       if (this.onerror) {
         this.onerror(error);
       }
@@ -694,14 +658,12 @@ ClientRouter.prototype.connect = async function (
   };
 
   transport.onerror = (error) => {
-    console.error("Error in server transport:", error);
     if (this.onerror) {
       this.onerror(error);
     }
   };
 
   transport.onclose = () => {
-    console.log("Server transport closed");
     if (this.onclose) {
       this.onclose();
     }
@@ -710,7 +672,6 @@ ClientRouter.prototype.connect = async function (
   // Set our onmessage handler to forward responses back to the transport
   this.onmessage = (response) => {
     transport.send(response).catch((error) => {
-      console.error("Error sending response to transport:", error);
       if (this.onerror) {
         this.onerror(error);
       }

@@ -250,7 +250,7 @@ test("multiclient transport correctly reads resources", async (t) => {
   // Test handling of non-existent resource
   await assert.rejects(
     async () => {
-      const result = await client.readResource({
+      return await client.readResource({
         uri: "client_prefix__nonexistent",
       });
     },
