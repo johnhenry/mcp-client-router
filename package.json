@@ -1,9 +1,10 @@
 {
   "name": "mcp-client-router",
+  "description": "A router for Model Context Protocol clients",
   "version": "0.0.0",
   "main": "src/index.mjs",
   "scripts": {
-    "test": "node --test --env-file-if-exists=tests/.env tests/test.**.mjs "
+    "test": "node --test --env-file-if-exists=tests/.env tests/test.*.mjs "
   },
   "keywords": [],
   "author": "",
