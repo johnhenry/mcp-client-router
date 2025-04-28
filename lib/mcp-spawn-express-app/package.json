@@ -1,0 +1,23 @@
+{
+  "name": "mcp-spawn-express-app",
+  "version": "1.0.0",
+  "description": "Create Express applications with Model Context Protocol (MCP) support",
+  "main": "index.mjs",
+  "types": "types.d.ts",
+  "type": "module",
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "express",
+    "http",
+    "server"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.10.2"
+  },
+  "peerDependencies": {
+    "express": ">=4.0.0"
+  }
+}
