@@ -110,14 +110,6 @@ The Client Router prefixes the names of tools, prompts, and resources with the c
 
 When you call a prefixed tool/prompt/resource, the Client Router routes the call to the appropriate client.
 
-## Submodules
-
-This package includes several utility submodules:
-
-- `mcp-declarative-server`: Create MCP servers declaratively
-- `mcp-spawn-client`: Easily spawn clients connected to servers
-- `mcp-create-express-app`: Create Express apps with MCP support
-
 ## API Reference
 
 ### `ClientRouter`
