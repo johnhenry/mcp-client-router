@@ -1,7 +1,7 @@
 {
   "name": "mcp-client-router",
   "description": "A transport interface for aggregating multiple Model Context Protocol clients into a single unified interface",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "main": "src/index.mjs",
   "types": "types.d.ts",
   "type": "module",
