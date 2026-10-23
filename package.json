@@ -1,10 +1,16 @@
 {
-  "name": "mcp-client-router",
+  "name": "@johnhenry/mcp-client-router",
+  "version": "1.1.0",
   "description": "A transport interface for aggregating multiple Model Context Protocol clients into a single unified interface",
-  "version": "1.0.1",
+  "type": "module",
   "main": "src/index.mjs",
   "types": "types.d.ts",
-  "type": "module",
+  "files": [
+    "src/**/*",
+    "lib/**/*",
+    "types.d.ts",
+    "README.md"
+  ],
   "scripts": {
     "test:one": "node --test --env-file-if-exists=tests/.env",
     "test": "node --run test:one -- tests/test.*.mjs"
@@ -17,30 +23,28 @@
     "transport",
     "combine"
   ],
-  "author": "",
-  "license": "ISC",
+  "author": "John Henry <john@iamjohnhenry.com>",
+  "license": "MIT",
+  "engines": {
+    "node": ">=22"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.10.2",
-    "mcp-create-express-app": "^0.0.0",
-    "mcp-declarative-server": "^0.0.0",
-    "mcp-spawn-client": "^0.0.0"
+    "@johnhenry/mcp-create-express-app": "^0.1.0",
+    "@johnhenry/mcp-declarative-server": "^0.1.0",
+    "@johnhenry/mcp-spawn-client": "^0.1.0"
   },
   "devDependencies": {
     "zod": "^3.24.3"
   },
-  "files": [
-    "src/**/*",
-    "lib/**/*",
-    "types.d.ts",
-    "README.md"
-  ],
-  "engines": {
-    "node": ">=18.0.0"
-  },
   "repository": {
     "type": "git",
-    "url": "https://github.com/johnhenry/mcp-client-router"
+    "url": "git+https://github.com/johnhenry/mcp-client-router.git"
   },
+  "homepage": "https://github.com/johnhenry/mcp-client-router#readme",
   "bugs": {
     "url": "https://github.com/johnhenry/mcp-client-router/issues"
   }

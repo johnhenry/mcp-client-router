@@ -1,5 +1,7 @@
 # MCP Client Router
 
+> Previously published on npm as `mcp-client-router` (unscoped). That name is no longer updated; use `@johnhenry/mcp-client-router`.
+
 The MCP Client Router is a transport interface for aggregating multiple Model Context Protocol (MCP) clients into a single unified interface. It allows you to seamlessly interact with multiple MCP servers through a single client interface.
 
 ## Features
@@ -13,7 +15,7 @@ The MCP Client Router is a transport interface for aggregating multiple Model Co
 ## Installation
 
 ```bash
-npm install mcp-client-router
+npm install @johnhenry/mcp-client-router
 ```
 
 ## Usage
@@ -21,7 +23,7 @@ npm install mcp-client-router
 ### Basic Usage
 
 ```javascript
-import { ClientRouter } from "mcp-client-router";
+import { ClientRouter } from "@johnhenry/mcp-client-router";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
 
@@ -63,7 +65,7 @@ const result = await router.callTool({
 ### Creating from Configuration Object
 
 ```javascript
-import { fromObject } from "mcp-client-router";
+import { fromObject } from "@johnhenry/mcp-client-router";
 
 const router = await fromObject({
   mcpServers: {
@@ -83,7 +85,7 @@ const router = await fromObject({
 ### Connecting to a Server Transport
 
 ```javascript
-import { ClientRouter } from "mcp-client-router";
+import { ClientRouter } from "@johnhenry/mcp-client-router";
 import { HTTPServerTransport } from "@modelcontextprotocol/sdk/server/http.js";
 
 // Create router with clients

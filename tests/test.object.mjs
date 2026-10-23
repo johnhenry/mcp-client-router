@@ -1,12 +1,13 @@
 import { test } from "node:test";
 import assert from "node:assert";
 import process from "node:process";
+import { fileURLToPath } from "node:url";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { fromObject } from "../src/index.mjs";
 import closeServer from "./start-http-server.mjs"; // Ensure the server is imported to register tools
-const PORT = process.env.PORT_FOR_SERVER;
-const DIR = process.env.PATH_TO_REPO;
-const NODE = process.env.PATH_TO_NODE;
+const PORT = process.env.PORT_FOR_SERVER ?? "18734";
+const DIR = process.env.PATH_TO_REPO ?? fileURLToPath(new URL("..", import.meta.url));
+const NODE = process.env.PATH_TO_NODE ?? process.execPath;
 
 const router = await fromObject(
   {
@@ -125,18 +126,23 @@ await test("multiclient transport correctly lists and prefixes all tools", async
 // Test error handling for non-existent tools
 await test("multiclient transport correctly handles non-existent tools", async (t) => {
   // Try to call a non-existent tool
-  await assert.rejects(
-    async () => {
-      await client.callTool({
-        name: "client_prefix__non_existent_tool",
-        arguments: { message: "hello" },
-      });
-    },
-    (err) => {
-      // Check that we get the expected error
-      return err.message.includes("not found");
-    }
-  );
+  // Older SDK releases reject; newer ones resolve with an `isError` result.
+  let outcome;
+  try {
+    outcome = await client.callTool({
+      name: "client_prefix__non_existent_tool",
+      arguments: { message: "hello" },
+    });
+  } catch (err) {
+    outcome = err;
+  }
+  const text =
+    outcome instanceof Error
+      ? outcome.message
+      : outcome.isError
+      ? outcome.content.map((c) => c.text).join(" ")
+      : "";
+  assert.ok(text.includes("not found"), `expected a "not found" error, got: ${text}`);
 
   // Try to call a tool with wrong client prefix
   await assert.rejects(

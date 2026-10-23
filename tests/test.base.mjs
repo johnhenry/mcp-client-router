@@ -64,18 +64,23 @@ test("multiclient transport correctly lists and prefixes all tools", async (t) =
 // Test error handling for non-existent tools
 test("multiclient transport correctly handles non-existent tools", async (t) => {
   // Try to call a non-existent tool
-  await assert.rejects(
-    async () => {
-      await client.callTool({
-        name: "client_prefix__non_existent_tool",
-        arguments: { message: "hello" },
-      });
-    },
-    (err) => {
-      // Check that we get the expected error
-      return err.message.includes("not found");
-    }
-  );
+  // Older SDK releases reject; newer ones resolve with an `isError` result.
+  let outcome;
+  try {
+    outcome = await client.callTool({
+      name: "client_prefix__non_existent_tool",
+      arguments: { message: "hello" },
+    });
+  } catch (err) {
+    outcome = err;
+  }
+  const text =
+    outcome instanceof Error
+      ? outcome.message
+      : outcome.isError
+      ? outcome.content.map((c) => c.text).join(" ")
+      : "";
+  assert.ok(text.includes("not found"), `expected a "not found" error, got: ${text}`);
 
   // Try to call a tool with wrong client prefix
   await assert.rejects(
